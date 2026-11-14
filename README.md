@@ -14,7 +14,7 @@ El programa no muestra una representación gráfica del cohete. La simulación r
 
 El proyecto incluye un archivo ejecutable (`Simulador-Artemis.exe`) para facilitar su utilización en Windows, sin necesidad de instalar un compilador de C.
 
-**Video explicativo de cómo descargarlo:**
+**Video explicativo de cómo descargar el EJECUTABLE .EXE:**
 https://youtu.be/-oIm6Hfa0Ao
 
 **Video demo del funcionamiento del simulador:**
