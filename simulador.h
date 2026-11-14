@@ -63,6 +63,7 @@ void consultar_historial(Simulacion historial[], int cantidadSimulaciones); //pe
 void comparar_simulaciones(Simulacion historial[], int cantidadSimulaciones); //permite comparar diferentes simulaciones
 
 //void no devuelve ningun valor, int devuelve un valor entero, parametros devuelve una estrucutra de tipo Parametros.
-
+void mostrar_parametros(Parametros parametros);
+void mostrar_resultados(Resultados resultados);
 
 #endif 

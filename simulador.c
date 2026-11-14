@@ -5,22 +5,6 @@
 #include "simulador.h"
 #include "validaciones.h"
 
-/*
-    simulador.c - Modulo de logica fisica del cohete SLS (Artemis 1)
-
-    Contiene las funciones que implementan:
-    - Carga y modificacion de parametros del escenario
-    - Control de coherencia fisica antes del ingreso de datos
-    - Pausa interactiva y ejecucion con cronometro en tiempo real (\r)
-    - Control de flujo por fases interactivo (continuar o salir)
-    - Calculos fisicos analiticos y simulacion paso a paso (MRUV)
-    - Impresion detallada de resultados con conversion de unidades
-*/
-
-
-/* ============================================================
-   FUNCIONES AUXILIARES DE FLUJO Y TIEMPO
-   ============================================================ */
 
 // Pausa la ejecucion una cantidad de segundos usando la libreria estandar <time.h>
 // Permite que la telemetria avance en tiempo real como un cronometro digital visible
@@ -42,7 +26,7 @@ int preguntar_continuacion(const char *mensajeSiguienteFase)
 {
     int opcion;
 
-    printf("\n¿Desea continuar con la simulacion?\n");
+    printf("Desea continuar con la simulacion?\n");
     printf("  1. Continuar a %s\n", mensajeSiguienteFase);
     printf("  2. Salir y volver al menu principal\n");
     printf("Seleccione una opcion: ");
@@ -51,7 +35,6 @@ int preguntar_continuacion(const char *mensajeSiguienteFase)
     if (opcion == 2)
     {
         printf("\nSimulacion finalizada por el usuario. Regresando al menu principal...\n");
-        esperar_tecla();
         return 0; // Indica al llamador salir al menu
     }
 
@@ -59,11 +42,7 @@ int preguntar_continuacion(const char *mensajeSiguienteFase)
 }
 
 
-/* ============================================================
-   CONFIGURACION DE PARAMETROS
-   ============================================================ */
-
-// Carga los valores originales del escenario 1 del Trabajo Final
+// Carga los valores originales del escenario 1 
 // a1 = 20.0 m/s2, t_sep = 120.0 s, a2 = 12.5 m/s2, h_apagado = 160000.0 m, dt = 1.0 s
 Parametros cargar_parametros_originales(void)
 {
@@ -107,25 +86,15 @@ Parametros modificar_parametros(Parametros parametros)
         printf("--------------------------------------------------------------\n");
         printf("  * Altura calculada al separar SRB: %10.2f m (%.2f km)\n", altura1_est, altura1_est / 1000.0);
         
-        // Verificacion visual preventiva de consistencia fisica
         if (nuevosParametros.alturaApagado <= altura1_est)
         {
-            printf("    [!] AVISO: Incoherencia fisica detectada (Fase 1 supera la altura de apagado)\n");
+            printf("    AVISO: Incoherencia fisica detectada (Fase 1 supera la altura de apagado)\n");
             printf("               Debe corregirse antes de guardar.\n");
         }
         else
         {
-            printf("    [OK] Proporcion fisica consistente (Altura apagado > Altura Fase 1)\n");
+            printf("   Proporcion fisica consistente (Altura apagado > Altura Fase 1)\n");
         }
-
-        printf("--------------------------------------------------------------\n");
-        printf("[i] REGLA DE CONSISTENCIA FISICA (MRUV):\n");
-        printf("    En Fase 1 el cohete asciende: h_sep = 0.5 * a1 * (t_sep)^2\n");
-        printf("    Por lo tanto, la Altura de apagado (Fase 2) SIEMPRE debe ser\n");
-        printf("    MAYOR que la altura alcanzada al separar los propulsores SRB.\n");
-        printf("    Ejemplo Artemis 1: Con a1 = 20 m/s2 y t = 120 s -> h_sep = 144.00 km.\n");
-        printf("    La altura de apagado debe superar los 144 km (Artemis usa 160.00 km).\n");
-        printf("--------------------------------------------------------------\n");
         printf("Acciones disponibles:\n");
         printf("  1. Modificar un parametro individual\n");
         printf("  2. Modificar TODOS los parametros (Asistente guiado)\n");
@@ -134,7 +103,6 @@ Parametros modificar_parametros(Parametros parametros)
         printf("  5. Cancelar cambios y volver al menu principal\n");
         printf("==============================================================\n");
         printf("Seleccione una opcion: ");
-
         opcion = leer_entero(1, 5);
         if (opcion == EOF) return parametros;
 
@@ -157,7 +125,7 @@ Parametros modificar_parametros(Parametros parametros)
                 } else if (subOpcion == 4) {
                     printf("Nota: Segun la Fase 1 actual, el cohete llega a %.2f m (%.2f km).\n", altura1_est, altura1_est / 1000.0);
                     printf("Nueva altura de apagado (debe ser mayor a %.2f m): ", altura1_est);
-                    nuevosParametros.alturaApagado = leer_real(1.0, 100000000.0);
+                    nuevosParametros.alturaApagado = leer_real(1.0, 300000.0); 
                 } else if (subOpcion == 5) {
                     printf("Nuevo intervalo de simulacion (%.0f a %.0f s): ", intervalo_minimo, intervalo_maximo);
                     nuevosParametros.intervaloSimulacion = leer_real(intervalo_minimo, intervalo_maximo);
@@ -171,9 +139,9 @@ Parametros modificar_parametros(Parametros parametros)
 
                 system("cls");
                 printf("==============================================================\n");
-                printf("        ASISTENTE: INGRESO DE PARAMETROS COMPLETOS            \n");
+                printf("         INGRESO DE PARAMETROS COMPLETOS            \n");
                 printf("==============================================================\n");
-                printf("[i] REGLA DE CONSISTENCIA FISICA ANTES DE INGRESAR VALORES:\n");
+                printf("REGLA DE CONSISTENCIA FISICA ANTES DE INGRESAR VALORES:\n");
                 printf("    Durante la Fase 1, la altura alcanzada se calcula como:\n");
                 printf("        h_separacion = 0.5 * a1 * (t_sep)^2\n");
                 printf("    La Altura de apagado (Fase 2) DEBE ser mayor a h_separacion.\n\n");
@@ -192,11 +160,11 @@ Parametros modificar_parametros(Parametros parametros)
                 printf("3. Ingrese aceleracion Fase 2 (0.01 a 1000.0 m/s2): ");
                 nuevosParametros.aceleracion2 = leer_real(0.01, 1000.0);
 
-                // Se calcula la cota fisica alcanzada con los datos recien ingresados
+                // Se calcula con los datos recien ingresados
                 altura1_est = 0.5 * nuevosParametros.aceleracion1 * nuevosParametros.tiempoSeparacion * nuevosParametros.tiempoSeparacion;
                 printf("\n    --> Proporcion Fase 1 calculada: h_sep = %.2f m (%.2f km)\n", altura1_est, altura1_est / 1000.0);
                 printf("4. Ingrese altura de apagado de motores (debe superar %.2f m): ", altura1_est);
-                nuevosParametros.alturaApagado = leer_real(altura1_est + 1.0, 100000000.0);
+                nuevosParametros.alturaApagado = leer_real(altura1_est + 1.0, 300000.0);
 
                 printf("5. Ingrese intervalo de simulacion (%.0f a %.0f s): ", intervalo_minimo, intervalo_maximo);
                 nuevosParametros.intervaloSimulacion = leer_real(intervalo_minimo, intervalo_maximo);
@@ -219,13 +187,11 @@ Parametros modificar_parametros(Parametros parametros)
                 if (confirmar == 1)
                 {
                     printf("\nParametros guardados exitosamente.\n");
-                    esperar_tecla();
                     return nuevosParametros;
                 }
                 else
                 {
                     printf("\nParametros guardados temporalmente en el borrador.\n");
-                    esperar_tecla();
                     break;
                 }
             }
@@ -233,7 +199,6 @@ Parametros modificar_parametros(Parametros parametros)
             case 3:
                 nuevosParametros = cargar_parametros_originales();
                 printf("\nValores originales de Artemis 1 restaurados.\n");
-                esperar_tecla();
                 break;
 
             case 4:
@@ -241,7 +206,6 @@ Parametros modificar_parametros(Parametros parametros)
                 if (validar_parametros(nuevosParametros))
                 {
                     printf("\nParametros validados y guardados con exito.\n");
-                    esperar_tecla();
                     return nuevosParametros;
                 }
                 else
@@ -262,17 +226,11 @@ Parametros modificar_parametros(Parametros parametros)
 
             case 5:
                 printf("\nModificacion cancelada. Se mantienen los parametros anteriores.\n");
-                esperar_tecla();
                 return parametros;
         }
 
     } while (1);
 }
-
-
-/* ============================================================
-   SIMULACION PRINCIPAL - CALCULOS FISICOS Y TELEMETRIA
-   ============================================================ */
 
 // Ejecuta la simulacion completa de las 3 fases del vuelo del SLS
 int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int cantidadSimulaciones)
@@ -308,10 +266,6 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
         return cantidadSimulaciones;
     }
 
-    /* ==========================================================
-       CALCULOS ANALITICOS PREVIOS (respuestas del TP)
-       ========================================================== */
-
     // a) Velocidad al separar los SRB (fin de fase 1): v = v0 + a * t
     resultados.velocidad1 = velocidadInicial + parametros.aceleracion1 * parametros.tiempoSeparacion;
 
@@ -336,16 +290,11 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
     // Tiempo de la fase 3: t = v / g
     tiempoFase3 = resultados.velocidad2 / gravedad;
 
-    // Tiempo total hasta el apogeo
+    // Tiempo total hasta la altura maxima: t_total = t_sep + t_fase2 + t_fase3
     resultados.tiempoTotal = parametros.tiempoSeparacion + resultados.tiempo2 + tiempoFase3;
 
     // d) Aceleracion maxima como multiplo de g
     resultados.multiploGravedad = parametros.aceleracion1 / gravedad;
-
-
-    /* ==========================================================
-       SIMULACION PASO A PASO EN VIVO (CRONOMETRO DIGITAL)
-       ========================================================== */
 
     // Condiciones iniciales del vuelo
     tiempo = 0.0;
@@ -355,7 +304,6 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
     // Pausa por cada paso en Fase 1 (35 ms): permite ver el cronometro avanzar con claridad
     pausaPaso = 0.035;
 
-    /* --- FASE 1: ascenso con propulsores SRB --- */
     system("cls");
     printf("==============================================================\n");
     printf("              FASE 1: ASCENSO CON PROPULSORES SRB             \n");
@@ -369,7 +317,7 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
         tiempoRestante = parametros.tiempoSeparacion - tiempo;
         deltaTiempo = parametros.intervaloSimulacion;
 
-        // Ajuste en el ultimo paso para no pasarse del tiempo exacto de separacion
+        // Ajusta en el ultimo paso para no pasarse del tiempo exacto de separacion
         if (deltaTiempo > tiempoRestante)
         {
             deltaTiempo = tiempoRestante;
@@ -393,13 +341,13 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
         pausar_segundos(pausaPaso);
     }
 
-    // Fijar los valores exactos calculados
+    // pasamos los valores exactos calculados para la Fase 2
     altura = resultados.altura1;
     velocidad = resultados.velocidad1;
     tiempo = parametros.tiempoSeparacion;
 
     printf("\n\n--------------------------------------------------------------\n");
-    printf(">>> EVENTO: SEPARACION DE LOS PROPULSORES SRB <<<\n");
+    printf(" EVENTO: SEPARACION DE LOS PROPULSORES SRB \n");
     printf("--------------------------------------------------------------\n");
     printf("  - Tiempo de desacople: %.2f s (%.2f min)\n", tiempo, tiempo / 60.0);
     printf("  - Altitud alcanzada:   %.2f m (%.2f km)\n", altura, altura / 1000.0);
@@ -412,8 +360,6 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
         return cantidadSimulaciones;
     }
 
-
-    /* --- FASE 2: propulsion etapa central SLS --- */
     system("cls");
     printf("==============================================================\n");
     printf("         FASE 2: PROPULSION CON ETAPA CENTRAL SLS             \n");
@@ -456,7 +402,7 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
     }
 
     printf("\n\n--------------------------------------------------------------\n");
-    printf(">>> EVENTO: APAGADO DE MOTORES PRINCIPALES (MECO) <<<\n");
+    printf(" APAGADO DE MOTORES PRINCIPALES  \n");
     printf("--------------------------------------------------------------\n");
     printf("  - Tiempo transcurrido: %.2f s (%.2f min)\n", tiempo, tiempo / 60.0);
     printf("  - Duracion Fase 2:     %.2f s\n", resultados.tiempo2);
@@ -465,7 +411,7 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
     printf("--------------------------------------------------------------\n");
 
     // Pausa interactiva para Fase 2
-    if (!preguntar_continuacion("Fase 3 (Vuelo libre hasta el apogeo)"))
+    if (!preguntar_continuacion("Fase 3 (Vuelo libre hasta la altura maxima)"))
     {
         return cantidadSimulaciones;
     }
@@ -474,7 +420,7 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
     /* --- FASE 3: vuelo libre hasta el apogeo --- */
     system("cls");
     printf("==============================================================\n");
-    printf("              FASE 3: VUELO LIBRE HASTA EL APOGEO             \n");
+    printf("              FASE 3: VUELO LIBRE HASTA LA ALTURA MAXIMA            \n");
     printf("==============================================================\n");
     printf("Propulsion: APAGADA (inercia). Desaceleracion por gravedad: 9.80 m/s2\n");
     printf("Ascenso libre hasta que la velocidad vertical sea 0.0 m/s...\n\n");
@@ -504,23 +450,21 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
         segundosRestantes = tiempo - (minutos * 60.0);
 
         // Telemetria en vivo sobre el mismo renglon usando \r
-        printf("\r  [CRONOMETRO T+ %02d:%05.2f]  Altitud: %8.2f km  |  Velocidad: %8.2f km/h  (%.2f m/s)",
-               minutos, segundosRestantes, altura / 1000.0, velocidad * 3.6, velocidad);
+        printf("\r  [CRONOMETRO T+ %02d:%05.2f]  Altitud: %8.2f km  |  Velocidad: %8.2f km/h  (%.2f m/s)",  minutos, segundosRestantes, altura / 1000.0, velocidad * 3.6, velocidad);
         fflush(stdout);
 
-        // En Fase 3 (aprox 250 pasos) con 25 ms toma unos 6 segundos
+        // En Fase 3 aunque suelen ser pocos pasos, se da un tiempo mayor para poder leer el timer
         pausar_segundos(0.025);
     }
 
     printf("\n\n--------------------------------------------------------------\n");
-    printf(">>> EVENTO: APOGEO ALCANZADO (VELOCIDAD VERTICAL CERO) <<<\n");
+    printf(" ALTURA MAXIMA ALCANZADA (VELOCIDAD VERTICAL CERO) \n");
     printf("--------------------------------------------------------------\n");
-    printf("  - Tiempo total hasta apogeo:    %.2f s (%.2f min)\n", tiempo, tiempo / 60.0);
+    printf("  - Tiempo total hasta altura maxima:    %.2f s (%.2f min)\n", tiempo, tiempo / 60.0);
     printf("  - Altura maxima h_max:          %.2f m (%.2f km)\n", altura, altura / 1000.0);
     printf("  - Ganancia en vuelo libre:      %.2f m (%.2f km)\n", resultados.alturaAdicional, resultados.alturaAdicional / 1000.0);
     printf("--------------------------------------------------------------\n");
 
-    // Pausa interactiva antes de generar el resumen definitivo
     if (!preguntar_continuacion("Resumen de Mision (Informe final y registro)"))
     {
         return cantidadSimulaciones;
@@ -531,15 +475,13 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
     historial[cantidadSimulaciones].resultados = resultados;
     cantidadSimulaciones = cantidadSimulaciones + 1;
 
-    // Pantalla de resumen final
     system("cls");
     printf("==============================================================\n");
     printf("             RESUMEN DE MISION - ARTEMIS 1                    \n");
     printf("==============================================================\n");
     mostrar_resultados(resultados);
     printf("\n--------------------------------------------------------------\n");
-    printf("Simulacion registrada con exito en el historial (%d de %d).\n",
-           cantidadSimulaciones, capacidad_historial);
+    printf("Simulacion registrada con exito en el historial (%d de %d).\n", cantidadSimulaciones, capacidad_historial);
 
     esperar_tecla();
 
@@ -550,11 +492,9 @@ int ejecutar_simulacion(Parametros parametros, Simulacion historial[], int canti
 void mostrar_parametros(Parametros parametros)
 {
     printf("Aceleracion fase 1:      %.2f m/s2\n", parametros.aceleracion1);
-    printf("Tiempo de separacion:    %.2f s (%.2f min)\n",
-           parametros.tiempoSeparacion, parametros.tiempoSeparacion / 60.0);
+    printf("Tiempo de separacion:    %.2f s (%.2f min)\n", parametros.tiempoSeparacion, parametros.tiempoSeparacion / 60.0);
     printf("Aceleracion fase 2:      %.2f m/s2\n", parametros.aceleracion2);
-    printf("Altura de apagado:       %.2f m (%.2f km)\n",
-           parametros.alturaApagado, parametros.alturaApagado / 1000.0);
+    printf("Altura de apagado:       %.2f m (%.2f km)\n", parametros.alturaApagado, parametros.alturaApagado / 1000.0);
     printf("Intervalo de simulacion: %.2f s\n", parametros.intervaloSimulacion);
 }
 
@@ -564,28 +504,20 @@ void mostrar_resultados(Resultados resultados)
     int minutos;
     double segundosRestantes;
 
-    printf("\na) Velocidad al separar SRB:      %10.2f m/s  (%8.2f km/h)\n",
-           resultados.velocidad1, resultados.velocidad1 * 3.6);
-    printf("   Altura al separar SRB:         %10.2f m    (%8.2f km)\n",
-           resultados.altura1, resultados.altura1 / 1000.0);
+    printf("\na) Velocidad al separar SRB:      %10.2f m/s  (%8.2f km/h)\n", resultados.velocidad1, resultados.velocidad1 * 3.6);
+    printf("   Altura al separar SRB:         %10.2f m    (%8.2f km)\n",  resultados.altura1, resultados.altura1 / 1000.0);
 
     minutos = (int)(resultados.tiempo2 / 60.0);
     segundosRestantes = resultados.tiempo2 - minutos * 60.0;
-    printf("\nb) Velocidad al apagado:          %10.2f m/s  (%8.2f km/h)\n",
-           resultados.velocidad2, resultados.velocidad2 * 3.6);
-    printf("   Tiempo de la fase 2:           %10.2f s    (%d min %.2f s)\n",
-           resultados.tiempo2, minutos, segundosRestantes);
+    printf("\nb) Velocidad al apagado:          %10.2f m/s  (%8.2f km/h)\n", resultados.velocidad2, resultados.velocidad2 * 3.6);
+    printf("   Tiempo de la fase 2:           %10.2f s    (%d min %.2f s)\n", resultados.tiempo2, minutos, segundosRestantes);
 
-    printf("\nc) Altura adicional (vuelo libre): %10.2f m    (%8.2f km)\n",
-           resultados.alturaAdicional, resultados.alturaAdicional / 1000.0);
-    printf("   Altura maxima (apogeo):        %10.2f m    (%8.2f km)\n",
-           resultados.alturaMaxima, resultados.alturaMaxima / 1000.0);
+    printf("\nc) Altura adicional (vuelo libre): %10.2f m    (%8.2f km)\n", resultados.alturaAdicional, resultados.alturaAdicional / 1000.0);
+    printf("   Altura maxima (apogeo):        %10.2f m    (%8.2f km)\n", resultados.alturaMaxima, resultados.alturaMaxima / 1000.0);
 
     minutos = (int)(resultados.tiempoTotal / 60.0);
     segundosRestantes = resultados.tiempoTotal - minutos * 60.0;
-    printf("\n   Tiempo total hasta apogeo:     %10.2f s    (%d min %.2f s)\n",
-           resultados.tiempoTotal, minutos, segundosRestantes);
+    printf("\n   Tiempo total hasta apogeo:     %10.2f s    (%d min %.2f s)\n", resultados.tiempoTotal, minutos, segundosRestantes);
 
-    printf("\nd) Aceleracion fase 1:            %10.2f G\n",
-           resultados.multiploGravedad);
+    printf("\nd) Aceleracion fase 1:            %10.2f G\n", resultados.multiploGravedad);
 }

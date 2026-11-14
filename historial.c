@@ -3,19 +3,6 @@
 #include "historial.h"
 #include "validaciones.h"
 
-/*
-    historial.c - Modulo de gestion del historial de simulaciones
-
-    Contiene las funciones de interaccion con el usuario para:
-    - Consultar simulaciones guardadas (parametros y resultados)
-    - Comparar dos simulaciones entre si (diferencias)
-*/
-
-
-/* ============================================================
-   CONSULTAR HISTORIAL
-   ============================================================ */
-
 void consultar_historial(Simulacion historial[], int cantidadSimulaciones)
 {
     int numeroSimulacion;
@@ -113,10 +100,6 @@ void consultar_historial(Simulacion historial[], int cantidadSimulaciones)
     } while (opcion != 4);
 }
 
-
-/* ============================================================
-   COMPARAR SIMULACIONES
-   ============================================================ */
 
 void comparar_simulaciones(Simulacion historial[], int cantidadSimulaciones)
 {

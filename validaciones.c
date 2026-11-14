@@ -170,3 +170,11 @@ void mostrar_error(void)
     printf("\nError: los parametros ingresados no son validos. \n");
     printf("Revise los valores e intente nuevamente \n");
 }
+void esperar_tecla(void)
+{
+    char pausa[10];
+
+    printf("\nPresione ENTER para continuar...");
+    fflush(stdout);
+    fgets(pausa, sizeof(pausa), stdin);
+}

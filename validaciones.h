@@ -17,6 +17,6 @@ int validar_parametros(Parametros parametros);
 
 void mostrar_error(void);
 
-
+void esperar_tecla(void);
 
 #endif 
