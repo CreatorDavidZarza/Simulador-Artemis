@@ -4,6 +4,10 @@ Sistema desarrollado en **lenguaje C**. Simula el ascenso del cohete SLS (Space 
 
 El programa no muestra una representación gráfica del cohete. La simulación representa matemáticamente su movimiento y permite observar cómo avanza durante el tiempo mediante valores numéricos de altura, distancia y velocidad.
 
+
+**VIDEO EXPLICATIVO GRUPAL (Todo el código en C):**
+
+
 ---
 
 ## ▶️ ¿Cómo ejecutar el programa?
@@ -14,6 +18,7 @@ El proyecto incluye un archivo ejecutable (`Simulador-Artemis.exe`) para facilit
 https://youtu.be/-oIm6Hfa0Ao
 
 **Video demo del funcionamiento del simulador:**
+https://youtu.be/cRmX9F54yUk
 
 
 ## 👥 Integrantes – Grupo D4
