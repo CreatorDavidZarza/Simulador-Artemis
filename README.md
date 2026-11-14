@@ -6,7 +6,7 @@ El programa no muestra una representación gráfica del cohete. La simulación r
 
 **LINK AL REPOSITORIO:** https://github.com/CreatorDavidZarza/Simulador-Artemis 
 
-**VIDEO EXPLICATIVO GRUPAL (Todo el código en C):**
+**VIDEO EXPLICATIVO GRUPAL (Todo el código en C):** https://www.youtube.com/watch?v=fUZ_VIYsemU
 
 
 ---
